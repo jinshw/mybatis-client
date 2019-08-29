@@ -28,7 +28,6 @@
 /catalina.base_IS_UNDEFINED/
 
 /src/main/resources/static/dist
-/src/
 /pkg/
 /out/
 go.sum
