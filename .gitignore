@@ -31,3 +31,4 @@
 /pkg/
 /out/
 go.sum
+src/main/mgt.exe
