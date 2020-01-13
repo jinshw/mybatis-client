@@ -31,6 +31,7 @@ type MapperBean struct {
 	Columns     string
 	InsertSQL   string
 	InsertMap   map[string]string
+	UpdateMap   map[string]string
 	FindListMap map[string]string
 	DeleteMap   map[string]string
 }
@@ -60,6 +61,8 @@ func GetMapperFile(objs []map[string]string, table string) {
 
 	_ifcolumn := ""
 	_ifpojo := ""
+	_updateSet :=""
+	_updateWhere :=""
 	_where := ""
 	for _, obj := range objs {
 		_javaField = strings.ToLower(obj["column_name"])
@@ -71,6 +74,9 @@ func GetMapperFile(objs []map[string]string, table string) {
 		_ifcolumn = _ifcolumn + "			<if test=\"" + _javaField + "!=null\">`" + obj["column_name"] + "`,</if> \n"
 		_ifpojo = _ifpojo + "			<if test=\"" + _javaField + "!=null\">#{" + _javaField + "},</if> \n"
 		_where = _where + "			<if test=\"" + _javaField + " != null\">AND " + obj["column_name"] + " = #{" + _javaField + "}</if>\n"
+
+		// update
+		_updateSet = _updateSet + "			<if test=\"" + _javaField + "!=null\">`" + obj["column_name"] + "`= #{"+ _javaField  +"},</if> \n"
 	}
 
 	// 去除最后一个,
@@ -91,6 +97,11 @@ func GetMapperFile(objs []map[string]string, table string) {
 	insertMap["ifcolumn"] = strings.Trim(_ifcolumn, "		")
 	insertMap["ifpojo"] = strings.Trim(_ifpojo, "		")
 
+	updateMap := make(map[string]string)
+	updateMap["table"] = table
+	updateMap["updateSet"] = strings.Trim(_updateSet, "		")
+	updateMap["updateWhere"] = strings.Trim(_updateWhere, "		")
+
 	findListMap := make(map[string]string)
 	findListMap["table"] = table
 	findListMap["where"] = strings.Trim(_where, "		")
@@ -106,6 +117,7 @@ func GetMapperFile(objs []map[string]string, table string) {
 		Columns:     strings.Trim(_columns, "		"),
 		InsertSQL:   strings.Trim(_insertSQL, "		"),
 		InsertMap:   insertMap,
+		UpdateMap:   updateMap,
 		FindListMap: findListMap,
 		DeleteMap:   deleteMap,
 	}
@@ -163,11 +175,13 @@ func GetDaoFile(table string) {
 	_insertList := "int insertSelective(List<" + javaName + "> pojo);"
 	_findList := "List<"+javaName+"> findList(" + javaName + " pojo);"
 	_delete := "int delete(" + javaName + " pojo);"
+	_update := "int updateOne(" + javaName + " pojo);"
 	//_methods = _insert + "\n" + _insertList + "\n" + _findList + "\n" + _delete + "\n"
 	_methods["_insert"] = _insert
 	_methods["_insertList"] = _insertList
 	_methods["_findList"] = _findList
 	_methods["_delete"] = _delete
+	_methods["_update"] = _update
 
 	daoBean := DaoBean{
 		Packages:     PACKAGE_DAO,

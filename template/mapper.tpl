@@ -26,6 +26,14 @@
         </trim>
     </insert>
 
+    <update id="updateOne">
+        UPDATE {{.UpdateMap.table}}
+        <trim prefix="set" suffixOverrides=",">
+            {{.UpdateMap.updateSet}}
+        </trim>
+        WHERE sid=#{sid}
+    </update>
+
     <select id="findList" parameterType="{{.PojoBean}}" resultMap="AllColumnMap">
         select
         <include refid="all_column"/>
